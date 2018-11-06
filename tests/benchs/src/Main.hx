@@ -14,8 +14,10 @@ class Main {
 
 		function printAndCollect(result:SuiteResult, benchCase) {
 			print(result);
-			if (!results.exists(benchCase)) results[benchCase] = [];
-			results[benchCase].push(result);
+			var currCase = results[benchCase];
+			if (currCase == null) results[benchCase] = currCase = new Map();
+			if (!currCase.exists(currTarget)) currCase[currTarget] = [];
+			currCase[currTarget].push(result);
 		}
 
 		for (benchCase in cases) {
@@ -23,9 +25,9 @@ class Main {
 			benchCase.exec.run(printAndCollect.bind(_, benchCase.name));
 		}
 
-		Sys.println(results);
-		Sys.println(haxe.format.JsonPrinter.print(results, null, "  "));
-		//Sys.println(haxe.format.JsonPrinter.print(haxe.Json.stringify(results), null, "  "));
+		//Sys.println(results);
+		var prettyJson = haxe.format.JsonPrinter.print(results, null, "  ");
+		sys.io.File.saveContent("bench_" + currTarget + ".json", prettyJson);
 	}
 
 	static function detectedTarget():String {
