@@ -3,21 +3,23 @@ import hxbenchmark.ResultPrinter;
 
 class Main {
 	static function main() {
-		var results = new Map();
-		var currTarget = detectedTarget();
+		var results:BenchCollection = {
+			target: detectedTarget(),
+			benchmarks: []
+		};
 
 		var cases = Macro.getCases("cases");
 		var printer = new ResultPrinter();
+
 		function print(result:SuiteResult) {
 			Sys.println(printer.print(result));
 		}
 
-		function printAndCollect(result:SuiteResult, benchCase) {
+		function printAndCollect(result:SuiteResult, benchName) {
 			print(result);
-			var currCase = results[benchCase];
-			if (currCase == null) results[benchCase] = currCase = new Map();
-			if (!currCase.exists(currTarget)) currCase[currTarget] = [];
-			currCase[currTarget].push(result);
+			var benchmark = results.benchmarks.filter((b) -> b.name == benchName);
+			if (benchmark.length == 0) results.benchmarks.push({name: benchName, suites:[result]});
+			else benchmark[0].suites.push(result);
 		}
 
 		for (benchCase in cases) {
@@ -25,13 +27,11 @@ class Main {
 			benchCase.exec.run(printAndCollect.bind(_, benchCase.name));
 		}
 
-		//Sys.println(results);
 		var prettyJson = haxe.format.JsonPrinter.print(results, null, "  ");
-		sys.io.File.saveContent("bench_" + currTarget + ".json", prettyJson);
+		sys.io.File.saveContent("bench_" + detectedTarget() + ".json", prettyJson);
 	}
 
-	static function detectedTarget():String {
-	// @formatter:off
+	static function detectedTarget():TargetType {
 		return
 		#if eval
 			EVAL;
@@ -60,8 +60,15 @@ class Main {
 		#else
 			UNKNOWN;
 		#end
-	// @formatter:on
 	}
+}
+
+typedef BenchCollection = {
+	var target:TargetType;
+	var benchmarks:Array<{
+		name:String,
+		suites:Array<SuiteResult>
+	}>;
 }
 
 @:enum abstract TargetType(String) to String {
