@@ -4,7 +4,7 @@ import hxbenchmark.ResultPrinter;
 class Main {
 	static function main() {
 		var results:BenchCollection = {
-			target: detectedTarget(),
+			target: currentTarget,
 			benchmarks: []
 		};
 
@@ -28,11 +28,10 @@ class Main {
 		}
 
 		var prettyJson = haxe.format.JsonPrinter.print(results, null, "  ");
-		sys.io.File.saveContent("bench_" + detectedTarget() + ".json", prettyJson);
+		sys.io.File.saveContent("bench_" + currentTarget + ".json", prettyJson);
 	}
 
-	static function detectedTarget():TargetType {
-		return
+	static inline var currentTarget:BenchCollection.TargetType =
 		#if eval
 			EVAL;
 		#elseif flash
@@ -60,29 +59,4 @@ class Main {
 		#else
 			UNKNOWN;
 		#end
-	}
-}
-
-typedef BenchCollection = {
-	var target:TargetType;
-	var benchmarks:Array<{
-		name:String,
-		suites:Array<SuiteResult>
-	}>;
-}
-
-@:enum abstract TargetType(String) to String {
-	var EVAL = "eval";
-	var FLASH = "flash";
-	var NODEJS = "nodejs";
-	var JS = "js";
-	var CPP = "cpp";
-	var NEKO = "neko";
-	var HL = "hl";
-	var CS = "cs";
-	var JAVA = "java";
-	var PYTHON = "python";
-	var PHP = "php";
-	var LUA = "lua";
-	var UNKNOWN = "unknown";
 }
