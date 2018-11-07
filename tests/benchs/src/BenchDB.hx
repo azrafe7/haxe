@@ -24,6 +24,17 @@ typedef TestEntry = {
 	var numSamples:Int;
 }
 
+typedef BenchDBQuery = {
+	@:optional var targetID:Int;
+	@:optional var benchID:Int;
+	@:optional var suiteID:Int;
+	@:optional var caseID:Int;
+
+	@:optional var target:String;
+	@:optional var benchName:String;
+	@:optional var suiteName:String;
+	@:optional var caseName:String;
+}
 
 class BenchDB {
 
@@ -32,6 +43,11 @@ class BenchDB {
 	public var suiteNames:Map<String, Int> = [];
 	public var caseNames:Map<String, Int> = [];
 	public var tests:Array<TestEntry> = [];
+
+	var targetsById:Map<Int, TargetType> = [];
+	var benchNamesById:Map<Int, String> = [];
+	var suiteNamesById:Map<Int, String> = [];
+	var caseNamesById:Map<Int, String> = [];
 
 	public function new(jsonArray:Array<String>) {
 		if (jsonArray == null || jsonArray.length == 0) throw "No bench data found!";
@@ -44,24 +60,35 @@ class BenchDB {
 		for (jsonString in jsonArray) {
 			var bc:BenchCollection = haxe.Json.parse(jsonString);
 
-			if (!this.targets.exists(bc.target)) this.targets[bc.target] = targetID++;
+			if (!this.targets.exists(bc.target)) this.targets[bc.target] = targetID;
 			for (bench in bc.benchmarks) {
-				if (!this.benchNames.exists(bench.name)) this.benchNames[bench.name] = benchID++;
+				if (!this.benchNames.exists(bench.name)) this.benchNames[bench.name] = benchID;
 				for (suite in bench.suites) {
-					if (!this.suiteNames.exists(suite.name)) this.suiteNames[suite.name] = suiteID++;
+					if (!this.suiteNames.exists(suite.name)) this.suiteNames[suite.name] = suiteID;
 					for (testcase in suite.cases) {
-						if (!this.caseNames.exists(testcase.name)) this.caseNames[testcase.name] = caseID++;
+						if (!this.caseNames.exists(testcase.name)) this.caseNames[testcase.name] = caseID;
 						var testEntry:TestEntry = {
-							targetID: targetID - 1,
-							benchID: benchID - 1,
-							suiteID: suiteID - 1,
-							caseID: caseID - 1,
+							targetID: targetID,
+							benchID: benchID,
+							suiteID: suiteID,
+							caseID: caseID,
 							numSamples: testcase.numSamples
 						}
 						this.tests.push(testEntry);
+
+						// update mapsById
+						targetsById[targetID] = bc.target;
+						benchNamesById[benchID] = bench.name;
+						suiteNamesById[suiteID] = suite.name;
+						caseNamesById[caseID] = testcase.name;
+
+						caseID++;
 					}
+					suiteID++;
 				}
+				benchID++;
 			}
+			targetID++;
 		}
 	}
 
@@ -78,24 +105,29 @@ class BenchDB {
 		return prettyJson;
 	}
 
-	public function getTestBy(targetID, benchID, suiteID, caseID):Null<TestResultInfo> {
+	public function query(q:BenchDBQuery):Array<TestResultInfo> {
 		var results = tests.filter((t) ->
-			(t.targetID == targetID) &&
-			(t.benchID == benchID) &&
-			(t.suiteID == suiteID) &&
-			(t.caseID == caseID)
+			(q.targetID == null || q.targetID == t.targetID) &&
+			(q.benchID  == null || q.benchID == t.benchID) &&
+			(q.suiteID  == null || q.suiteID == t.suiteID) &&
+			(q.caseID   == null || q.caseID == t.caseID) &&
+
+			(q.target    == null || q.target == targetsById[t.targetID]) &&
+			(q.benchName == null || q.benchName == benchNamesById[t.benchID]) &&
+			(q.suiteName == null || q.suiteName == suiteNamesById[t.suiteID]) &&
+			(q.caseName  == null || q.caseName == caseNamesById[t.caseID])
 		);
 
-		if (results.length > 0) {
-			var t = results[0];
-			return toTestResultInfo(t);
-		} else {
-			return null;
-		}
+		return results.map(toTestResultInfo);
 	}
 
-	static public function toTestResultInfo(t:TestEntry):TestResultInfo
-	{
-		return null;
+	public function toTestResultInfo(t:TestEntry):TestResultInfo {
+		return {
+			target: targetsById[t.targetID],
+			benchName: benchNamesById[t.benchID],
+			suiteName: suiteNamesById[t.suiteID],
+			caseName: caseNamesById[t.caseID],
+			numSamples: t.numSamples,
+		}
 	}
 }
