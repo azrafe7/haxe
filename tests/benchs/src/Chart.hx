@@ -134,7 +134,6 @@ class Chart {
 
 		trace(uniqueCaseNames);
 
-
 		var collectedData:Dynamic = {
 
 		};
@@ -169,8 +168,16 @@ class Chart {
 
 		trace(series);
 
-		results.map((t:TestInfo) -> {
+		var ellipsizedCaseNames = uniqueCaseNames.map(function(str) {
+			var len = str.length;
+			var charsPerLine = 14;
+			if (len < charsPerLine) return str;
 
+			var chunks = len / charsPerLine;
+			var res = "";
+			for (i in 0...Math.ceil(chunks)) res += str.substr(i * charsPerLine, charsPerLine) + "\n";
+
+			return res;
 		});
 
 		var options = {
@@ -188,7 +195,10 @@ class Chart {
 				{
 					type: 'category',
 					axisTick: {show: false},
-					data: uniqueCaseNames
+					axisLabel: {
+						rotate: 0
+					},
+					data: ellipsizedCaseNames,
 				}
 			],
 			yAxis: [
