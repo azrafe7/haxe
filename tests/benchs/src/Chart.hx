@@ -112,6 +112,28 @@ class Chart {
 		colors[TargetType.UNKNOWN] = '#fff';
 	}
 
+	static function toFixed(f:Float, decimals:Int = 2):Float {
+		var exp = Math.pow(10, decimals);
+		return (Math.round(f * exp) / exp);
+	}
+
+	static function toMetric(value:Float, decimals:Int = 2):String {
+		var divisors = [1000, 1000000, 1000000000];
+		if (value < divisors[0]) return Std.string(toFixed(value, decimals));
+
+		var suffixes = ['K', 'M', 'G'];
+		var idx = 0;
+		while (idx < divisors.length) {
+			var div = divisors[idx];
+			value = value/div;
+			if (value < 1000) {
+				break;
+			}
+			idx++;
+		}
+		return "" + toFixed(value, decimals) + suffixes[idx];
+	}
+
 	static function prepareDataFor(suite:String, ?filterTargets:Array<TargetType>):Dynamic {
 		var results = benchDB.queryFunc((t:TestInfo) -> {
 			return t.suiteName == suite && (filterTargets == null || filterTargets.filter(x -> x == t.target).length > 0);
@@ -145,6 +167,13 @@ class Chart {
 				distance: 10,
 				align: 'center',
 				verticalAlign: 'middle',
+				formatter: (params) -> '{customLabelStyle|' + toMetric(params.value) + '}',
+				rich: {
+					customLabelStyle: {
+						fontSize: 10,
+						textBorderColor: '#fff'
+					}
+				}
 			}
 		};
 		var labelNames = [];
