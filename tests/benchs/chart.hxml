@@ -1,0 +1,6 @@
+-cp src
+-main Chart
+
+#-lib hxnodejs
+
+#-js export\index.js
