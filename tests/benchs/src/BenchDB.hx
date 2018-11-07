@@ -8,7 +8,9 @@ using StringTools;
 using Lambda;
 
 
-typedef TestResultInfo = {
+typedef TestInfo = {
+	> TestEntry,
+
 	var target:TargetType;
 	var benchName:String;
 	var suiteName:String;
@@ -105,7 +107,11 @@ class BenchDB {
 		return prettyJson;
 	}
 
-	public function query(q:BenchDBQuery):Array<TestResultInfo> {
+	public function queryFunc(qfn:(t:TestInfo)->Bool):Array<TestInfo> {
+		return tests.map(toTestInfo).filter(qfn);
+	}
+
+	public function query(q:BenchDBQuery):Array<TestInfo> {
 		var results = tests.filter((t) ->
 			(q.targetID == null || q.targetID == t.targetID) &&
 			(q.benchID  == null || q.benchID == t.benchID) &&
@@ -118,11 +124,16 @@ class BenchDB {
 			(q.caseName  == null || q.caseName == caseNamesById[t.caseID])
 		);
 
-		return results.map(toTestResultInfo);
+		return results.map(toTestInfo);
 	}
 
-	public function toTestResultInfo(t:TestEntry):TestResultInfo {
+	public function toTestInfo(t:TestEntry):TestInfo {
 		return {
+			targetID: t.targetID,
+			benchID: t.benchID,
+			suiteID: t.suiteID,
+			caseID: t.caseID,
+
 			target: targetsById[t.targetID],
 			benchName: benchNamesById[t.benchID],
 			suiteName: suiteNamesById[t.suiteID],
