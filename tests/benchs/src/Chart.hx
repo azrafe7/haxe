@@ -138,7 +138,15 @@ class Chart {
 
 		};
 
-		var labelOption = {};
+		var labelOptions = {
+			normal: {
+				show: true,
+				position: 'top',
+				distance: 10,
+				align: 'center',
+				verticalAlign: 'middle',
+			}
+		};
 		var labelNames = [];
 		var barColors = [];
 		var series = [];
@@ -162,23 +170,12 @@ class Chart {
 				name: labelNames[i],
 				type: 'bar',
 				barGap: 0,
+				label: labelOptions,
 				data: s
 			});
 		}
 
 		trace(series);
-
-		var ellipsizedCaseNames = uniqueCaseNames.map(function(str) {
-			var len = str.length;
-			var charsPerLine = 14;
-			if (len < charsPerLine) return str;
-
-			var chunks = len / charsPerLine;
-			var res = "";
-			for (i in 0...Math.ceil(chunks)) res += str.substr(i * charsPerLine, charsPerLine) + "\n";
-
-			return res;
-		});
 
 		var options = {
 			color: barColors,
@@ -198,7 +195,7 @@ class Chart {
 					axisLabel: {
 						rotate: 0
 					},
-					data: ellipsizedCaseNames,
+					data: uniqueCaseNames,
 				}
 			],
 			yAxis: [
