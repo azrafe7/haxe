@@ -7,7 +7,7 @@ using StringTools;
 class ChartMacro
 {
 	macro public static function getJsonBenchmarks() {
-		#if macro
+		#if (macro && !display)
 			var jsonArray = [];
 			var path = Context.resolvePath("..");
 			for (file in sys.FileSystem.readDirectory(path)) {
