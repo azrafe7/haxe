@@ -45,6 +45,8 @@ class Chart {
 		TargetType.UNKNOWN
 	];
 
+	static public var chart:ECharts;
+
 	static function main()
 	{
 		var jsonArray = ChartMacro.getJsonBenchmarks();
@@ -65,7 +67,7 @@ class Chart {
 		trace(results.length);
 
 		results = benchDB.queryFunc((t:TestInfo) -> {
-			return t.benchName.startsWith("Custom") && t.suiteName.indexOf("Int") > 0;
+			return t.benchName.startsWith("Chara") && t.suiteName.indexOf("1000000") > 0;
 		});
 		trace(haxe.format.JsonPrinter.print(results, null, "  "));
 		trace(results.length);
@@ -93,7 +95,7 @@ class Chart {
 			}]
 		};
 
-		setupChart(testData);
+		chart = setupChart(testData);
 	}
 
 	static function setupColors() {
@@ -123,15 +125,9 @@ class Chart {
 
 		var suffixes = ['K', 'M', 'G'];
 		var idx = 0;
-		while (idx < divisors.length) {
-			var div = divisors[idx];
-			value = value/div;
-			if (value < 1000) {
-				break;
-			}
-			idx++;
-		}
-		return "" + toFixed(value, decimals) + suffixes[idx];
+		while (idx < divisors.length && value >= divisors[idx]) idx++;
+
+		return "" + toFixed(value / divisors[idx-1], decimals) + suffixes[idx-1];
 	}
 
 	static function prepareDataFor(suite:String, ?filterTargets:Array<TargetType>):Dynamic {
@@ -156,22 +152,20 @@ class Chart {
 
 		trace(uniqueCaseNames);
 
-		var collectedData:Dynamic = {
-
-		};
-
 		var labelOptions = {
 			normal: {
 				show: true,
 				position: 'top',
 				distance: 10,
-				align: 'center',
+				align: 'left',
 				verticalAlign: 'middle',
+				rotate: 90,
 				formatter: (params) -> '{customLabelStyle|' + toMetric(params.value) + '}',
 				rich: {
 					customLabelStyle: {
 						fontSize: 10,
-						textBorderColor: '#fff'
+						//textBorderColor: '#fff',
+						//textBorderWidth: 2
 					}
 				}
 			}
@@ -207,6 +201,13 @@ class Chart {
 		trace(series);
 
 		var options = {
+			title: {
+				text: results[0].benchName,
+				subtext: results[0].suiteName
+			},
+			grid: {
+				containLabel: true
+			},
 			color: barColors,
 			tooltip: {
 				trigger: 'axis',
@@ -219,16 +220,30 @@ class Chart {
 			},
 			xAxis: [
 				{
+					name: 'cases',
+					nameLocation: 'center',
+					nameGap: 50,
+					nameTextStyle: {
+						fontWeight: 'bold',
+						fontSize: 14
+					},
 					type: 'category',
 					axisTick: {show: false},
 					axisLabel: {
-						rotate: 0
+						rotate: 90
 					},
 					data: uniqueCaseNames,
 				}
 			],
 			yAxis: [
 				{
+					name: 'numSamples',
+					nameLocation: 'center',
+					nameGap: 80,
+					nameTextStyle: {
+						fontWeight: 'bold',
+						fontSize: 14
+					},
 					type: 'value'
 				}
 			],
