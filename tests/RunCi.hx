@@ -56,30 +56,30 @@ class RunCi {
 				switch (test) {
 					case Macro:
 						runci.targets.Macro.run(args);
-					case Neko:
-						runci.targets.Neko.run(args);
-					case Php:
-						runci.targets.Php.run(args);
-					case Python:
-						runci.targets.Python.run(args);
-					case Lua:
-						runci.targets.Lua.run(args);
-					case Cpp:
-						runci.targets.Cpp.run(args, true, true);
-					case Cppia:
-						runci.targets.Cpp.run(args, false, true);
-					case Js:
-						runci.targets.Js.run(args);
-					case Java:
-						runci.targets.Java.run(args);
-					case Cs:
-						runci.targets.Cs.run(args);
-					case Flash9:
-						runci.targets.Flash.run(args);
-					case As3:
-						runci.targets.As3.run(args);
-					case Hl:
-						runci.targets.Hl.run(args);
+					//case Neko:
+					//	runci.targets.Neko.run(args);
+					//case Php:
+					//	runci.targets.Php.run(args);
+					//case Python:
+					//	runci.targets.Python.run(args);
+					//case Lua:
+					//	runci.targets.Lua.run(args);
+					//case Cpp:
+					//	runci.targets.Cpp.run(args, true, true);
+					//case Cppia:
+					//	runci.targets.Cpp.run(args, false, true);
+					//case Js:
+					//	runci.targets.Js.run(args);
+					//case Java:
+					//	runci.targets.Java.run(args);
+					//case Cs:
+					//	runci.targets.Cs.run(args);
+					//case Flash9:
+					//	runci.targets.Flash.run(args);
+					//case As3:
+					//	runci.targets.As3.run(args);
+					//case Hl:
+					//	runci.targets.Hl.run(args);
 					case t:
 						throw "unknown target: " + t;
 				}
@@ -98,6 +98,72 @@ class RunCi {
 				successMsg('test ${test} succeeded');
 			} else {
 				failMsg('test ${test} failed');
+			}
+
+
+			// --- run benchmarks
+
+			if (success) {
+
+				switch (ci) {
+					case TravisCI:
+						Sys.println('travis_fold:start:bench-${test}');
+					case _:
+						//pass
+				}
+
+				infoMsg('bench $test');
+				var benchSuccess = true;
+				try {
+					changeDirectory(benchsDir);
+
+
+					switch (test) {
+						case Macro:
+							runci.targets.Macro.runBench(args);
+						//case Neko:
+						//	runci.targets.Neko.run(args);
+						//case Php:
+						//	runci.targets.Php.run(args);
+						//case Python:
+						//	runci.targets.Python.run(args);
+						//case Lua:
+						//	runci.targets.Lua.run(args);
+						//case Cpp:
+						//	runci.targets.Cpp.run(args, true, true);
+						//case Cppia:
+						//	runci.targets.Cpp.run(args, false, true);
+						//case Js:
+						//	runci.targets.Js.run(args);
+						//case Java:
+						//	runci.targets.Java.run(args);
+						//case Cs:
+						//	runci.targets.Cs.run(args);
+						//case Flash9:
+						//	runci.targets.Flash.run(args);
+						//case As3:
+						//	runci.targets.As3.run(args);
+						//case Hl:
+						//	runci.targets.Hl.run(args);
+						case t:
+							throw "unknown target: " + t;
+					}
+				} catch(f:Failure) {
+					benchSuccess = false;
+				}
+
+				switch (ci) {
+					case TravisCI:
+						Sys.println('travis_fold:end:bench-${test}');
+					case _:
+						//pass
+				}
+
+				if (benchSuccess) {
+					successMsg('bench ${test} succeeded');
+				} else {
+					failMsg('bench ${test} failed');
+				}
 			}
 		}
 

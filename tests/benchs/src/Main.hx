@@ -29,6 +29,8 @@ class Main {
 
 		var prettyJson = haxe.format.JsonPrinter.print(results, null, "  ");
 		sys.io.File.saveContent("bench_" + currentTarget + ".json", prettyJson);
+
+		Sys.println(haxe.format.JsonPrinter.print(results));
 	}
 
 	static inline var currentTarget:BenchCollection.TargetType =
