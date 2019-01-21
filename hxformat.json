@@ -1,0 +1,69 @@
+{
+	"disableFormatting": false,
+	"emptyLines": {
+		"afterLeftCurly": "keep",
+		"afterPackage": 1,
+		"maxAnywhereInFile": 2,
+		"abstractEmptyLines": {
+			"beginType": 1
+    },
+		"classEmptyLines": {
+			"beginType": 1
+    }
+  },  
+	"whitespace": {
+    "typeCheckColonPolicy": "around",
+    "typeHintColonPolicy": "none",
+		"objectFieldColonPolicy": "none",
+		"arrowFunctionsPolicy": "around",
+		"functionTypeHaxe4Policy": "around",
+		"functionTypeHaxe3Policy": "around",
+		"bracesConfig": {
+			"blockBraces": {
+				"openingPolicy": "around",
+				"closingPolicy": "around",
+				"removeInnerWhenEmpty": false
+			},
+			"anonTypeBraces": {
+				"openingPolicy": "around",
+				"closingPolicy": "around",
+				"removeInnerWhenEmpty": false
+			},
+			"objectLiteralBraces": {
+				"openingPolicy": "around",
+				"closingPolicy": "around",
+				"removeInnerWhenEmpty": false
+			},
+			"unknownBraces": {
+				"openingPolicy": "around",
+				"closingPolicy": "around",
+				"removeInnerWhenEmpty": false
+			}
+		},
+		"parenConfig": {
+			"funcParamParens": {
+				"openingPolicy": "none",
+				"closingPolicy": "onlyAfter",
+				"removeInnerWhenEmpty": true
+			}
+    }
+  },
+  "maxLineLength": 180,
+	"indentation": {
+		"conditionalPolicy": "aligned"
+  },
+	"wrapping": {
+		"functionSignature": {
+			"rules": [
+				{
+					"conditions": [
+						{
+							"cond": "totalItemLength >= n",
+							"value": 120
+						}
+					]
+				}
+			]
+		}
+  }
+}
